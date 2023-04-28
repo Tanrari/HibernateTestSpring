@@ -12,11 +12,13 @@ public interface SingerDao {
     String findFirstNameById(Long id);
     void insert(Singer singer);
     void update(Singer singer);
-    void delete(Long singerId);
+    void delete(Singer singerId);
+    void deleteSinger(Singer singer);
     List<Singer> findAllWithDetail();
     void insertWithDetail(Singer singer);
     List<Singer> findAllWithAlbum();
     String findNameById(Long id);
     void insertWithAlbum(Singer singer);
+    Singer findById(long id);
 
 }

@@ -1,4 +1,6 @@
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,29 +8,112 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.support.GenericApplicationContext;
 import spring.config.AppConfig;
 import spring.dao.SingerDao;
-import spring.dao.SingerDaoImpl;
+import spring.entities.Album;
+import spring.entities.Instrument;
 import spring.entities.Singer;
 
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class SpringHibernateDemo {
     private static Logger logger = LoggerFactory.getLogger(SpringHibernateDemo.class);
-    @Test
-    public  void main() {
-        GenericApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
-        SingerDao singerDao = ctx.getBean(SingerDao.class);
-       System.out.println(singerDao);
-       listSingers(singerDao.findAll());
+    private GenericApplicationContext ctx;
+    private SingerDao singerDao;
+    @Before
+    public void setUp(){
+        ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+        singerDao = ctx.getBean(SingerDao.class);
+        assertNotNull(singerDao);
 
+    }
+    @Test
+    public void testFindAll(){
+    List<Singer> singers = singerDao.findAll();
+    assertEquals(3,singers.size());
+    listSingerWithAlbum(singers);
+    }
+    @Test
+    public void testInsert(){
+        Singer singer = new Singer();
+        singer.setFirstName("BB");
+        singer.setLastName("King");
+        singer.setBirthDate(new Date((new GregorianCalendar(1940,8,16)
+                .getTime().getTime())));
+        Album album = new Album();
+        album.setTitle("My Kind of Blues");
+        album.setReleaseDate(new java.sql.Date((new GregorianCalendar(1961,7,18)
+                .getTime().getTime())));
+        singer.addAlbum(album);
+        singerDao.insert(singer);
+        assertNotNull(singer.getId());
+        List<Singer> singers = singerDao.findAllWithAlbum();
+        assertEquals(4,singers.size());
+        System.out.println(singer);
+    }
+
+    @Test
+    public void testFindById(){
+        Singer singer = singerDao.findById(1L);
+        assertNotNull(singer);
+        logger.info(singer.toString());
     }
 
     private static void listSingers(List<Singer> singers){
         logger.info("--- Listing singers:");
         for (Singer singer: singers){
-//            logger.info(singer);
-            System.out.println(singer.toString());
+            logger.info(singer.toString());
         }
 
     }
-}
+
+    private static void listSingerWithAlbum(List<Singer> singers){
+        logger.info("----- Listing singers with instruments:");
+        for (Singer singer: singers){
+            logger.info(singer.toString());
+            if (singer.getAlbums() !=null){
+                for (Album album: singer.getAlbums()){
+                    logger.info("\t"+ album.toString());
+                }
+            }
+        if (singer.getInstruments()!=null){
+            for (Instrument instrument: singer.getInstruments()){
+                logger.info("\t Instrument:"+ instrument.getInstrumentId());
+            }
+        }
+        }
+    }
+
+    @Test
+    public void testUpdate(){
+        Singer singer = singerDao.findById(1L);
+        //making sure such singer exists
+        assertNotNull(singer);
+        //making sure we got expected record
+        assertEquals("Mayer", singer.getLastName());
+        //retrieve the album
+        Album album = singer.getAlbums().stream().filter(a -> a.getTitle().equals("Battle Studies")).findFirst().get();
+        singer.setFirstName("John Clayton");
+        singer.removeAlbum(album);
+        singerDao.insert(singer);
+        listSingerWithAlbum(singerDao.findAllWithAlbum());
+    }
+
+    @Test
+    public void testDelete(){
+        Singer singer = singerDao.findById(2l);
+        assertNotNull(singer);
+        singerDao.delete(singer);
+    }
+    @After
+    public void tearDown(){
+        ctx.close();
+    }
+    }
+
+
+
 

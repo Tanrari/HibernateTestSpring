@@ -1,24 +1,33 @@
 package spring.entities;
-
-
 import javax.persistence.*;
 import java.io.Serializable;
-import java.sql.Date;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "singer")
+@NamedQueries({
+        @NamedQuery(name="Singer.findById",
+                query="select distinct s from Singer s " +
+                        "left join fetch s.albums a " +
+                        "left join fetch s.instruments i " +
+                        "where s.id = :id"),
+        @NamedQuery(name="Singer.findAllWithAlbum",
+                query="select distinct s from Singer s " +
+                        "left join fetch s.albums a " +
+                        "left join fetch s.instruments i")
+})
 public class Singer implements Serializable {
     private Long id;
     private String firstName;
     private String lastName;
-    private java.util.Date birthDate;
+    private Date birthDate;
     private Set<Album> albums = new HashSet<>();
     private Set<Instrument> instruments = new HashSet<>();
     private int version;
-    @ManyToMany
-    @JoinTable(name = "singer_instrument", joinColumns = @JoinColumn (name = "Singer_ID"),
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "singer_instrument" , joinColumns = @JoinColumn (name = "Singer_ID"),
     inverseJoinColumns = @JoinColumn(name = "INSTRUMENT_ID"))
     public Set<Instrument> getInstruments() {
         return instruments;
@@ -28,7 +37,7 @@ public class Singer implements Serializable {
         this.instruments = instruments;
     }
 
-    @OneToMany(mappedBy = "singer",cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "singer",cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     public Set<Album> getAlbums() {
         return albums;
     }
@@ -78,12 +87,8 @@ public class Singer implements Serializable {
 
     @Temporal(TemporalType.DATE)
     @Column(name = "BIRTH_DATE")
-    public java.util.Date getBirthDate() {
+    public Date getBirthDate() {
         return birthDate;
-    }
-
-    public void setBirthDate(java.util.Date birthDate) {
-        this.birthDate = birthDate;
     }
 
     public void setBirthDate(Date birthDate) {
@@ -101,12 +106,12 @@ public class Singer implements Serializable {
 
     @Override
     public String toString() {
-        return "jdbcTemplate.dto.Singer{" +
+        return "Singer{" +
                 "id=" + id +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", birthDate=" + birthDate +
-                ", albums=" + albums +
+//                ", albums=" + albums +
                 '}';
     }
 }

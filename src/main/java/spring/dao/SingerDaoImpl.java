@@ -24,7 +24,7 @@ public class SingerDaoImpl implements SingerDao{
     }
 
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true )
     public List<Singer> findAll() {
         return sessionFactory.getCurrentSession().createQuery("from Singer s").list();
     }
@@ -46,6 +46,8 @@ public class SingerDaoImpl implements SingerDao{
 
     @Override
     public void insert(Singer singer) {
+        sessionFactory.getCurrentSession().saveOrUpdate(singer);
+        logger.info("Singer saved with:" + singer.getId());
 
     }
 
@@ -54,8 +56,10 @@ public class SingerDaoImpl implements SingerDao{
 
     }
 
+
+
     @Override
-    public void delete(Long singerId) {
+    public void deleteSinger(Singer singer) {
 
     }
 
@@ -70,8 +74,10 @@ public class SingerDaoImpl implements SingerDao{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Singer> findAllWithAlbum() {
-        return null;
+        return sessionFactory.getCurrentSession().
+                getNamedQuery("Singer.findAllWithAlbum").list();
     }
 
     @Override
@@ -82,5 +88,15 @@ public class SingerDaoImpl implements SingerDao{
     @Override
     public void insertWithAlbum(Singer singer) {
 
+    }
+
+    public void delete(Singer singer){
+        sessionFactory.getCurrentSession().delete(singer);
+        logger.info("Singer deleted with id:"+singer.getId());
+    }
+    @Override
+    public Singer findById(long id) {
+        return (Singer) sessionFactory.getCurrentSession().getNamedQuery("Singer.findById")
+                .setParameter("id",id).uniqueResult();
     }
 }
