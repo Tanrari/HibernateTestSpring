@@ -6,7 +6,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.support.GenericApplicationContext;
 import spring.config.AppConfig;
 import spring.dao.SingerDao;
-import spring.dao.SingerDaoImpl;
 import spring.entities.Singer;
 
 import java.util.List;
@@ -17,16 +16,17 @@ public class SpringHibernateDemo {
     public  void main() {
         GenericApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
         SingerDao singerDao = ctx.getBean(SingerDao.class);
-       System.out.println(singerDao);
-       listSingers(singerDao.findAll());
+//       System.out.println(singerDao);
+       listSingers(singerDao.findAllWithAlbum());
+//       listSingers(singerDao.findById(2l));
+        System.out.println(singerDao.findById(2l));
 
     }
 
     private static void listSingers(List<Singer> singers){
         logger.info("--- Listing singers:");
         for (Singer singer: singers){
-//            logger.info(singer);
-            System.out.println(singer.toString());
+            logger.info(singer.toString());
         }
 
     }
