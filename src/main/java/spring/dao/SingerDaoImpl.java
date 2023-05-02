@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import spring.entities.Instrument;
 import spring.entities.Singer;
 import javax.annotation.Resource;
 import java.util.List;
@@ -88,6 +89,11 @@ public class SingerDaoImpl implements SingerDao{
     @Override
     public void insertWithAlbum(Singer singer) {
 
+    }
+
+    public void saveInstrument(Instrument instrument){
+        sessionFactory.getCurrentSession().saveOrUpdate(instrument);
+        logger.info("Instrument saved with:" + instrument.getInstrumentId());
     }
 
     public void delete(Singer singer){

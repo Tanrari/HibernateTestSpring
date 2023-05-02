@@ -1,6 +1,7 @@
 package spring.dao;
 
 
+import spring.entities.Instrument;
 import spring.entities.Singer;
 
 import java.util.List;
@@ -20,5 +21,6 @@ public interface SingerDao {
     String findNameById(Long id);
     void insertWithAlbum(Singer singer);
     Singer findById(long id);
+    void saveInstrument(Instrument instrument);
 
 }
